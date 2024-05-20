@@ -10,6 +10,7 @@ struct Contact
 {
     string name= "", surname = "", email = "", address = "", phone = "";
     int id = 0;
+    int idUserWhoCreatedContact = 0;
 };
 
 struct User
@@ -21,7 +22,7 @@ struct User
 
 
 int loadAddressBookFromFile(vector<Contact> &contacts);
-int newContact(vector<Contact> &contacts,int numberOfContacts);
+int newContact(vector<Contact> &contacts,int numberOfContacts, int idLoggedUser);
 void searchByName(vector<Contact> &contacts,int numberOfContacts);
 void searchBySurname(vector<Contact> &contacts, int numberOfContacts);
 void showAllContacts(vector<Contact> &contacts, int numberOfContacts);
@@ -36,7 +37,7 @@ void showContact(vector<Contact> &contacts, int whichContact);
 
 
 //Ksiazka addressowa - funkcje
-int newContact(vector<Contact> &contacts,int numberOfContacts)
+int newContact(vector<Contact> &contacts,int numberOfContacts, int idLoggedUser)
 {
     int lastId = 0;
     int contactId = 0;
@@ -68,6 +69,7 @@ int newContact(vector<Contact> &contacts,int numberOfContacts)
     Contact newContact;
 
     newContact.id = contactId;
+    newContact.idUserWhoCreatedContact = idLoggedUser;
     newContact.name = name;
     newContact.surname = surname;
     newContact.email = email;
@@ -81,6 +83,7 @@ int newContact(vector<Contact> &contacts,int numberOfContacts)
     if (file.good())
     {
         file<<contactId<<"|";
+        file<<idLoggedUser<<"|";
         file<<name<<"|";
         file<<surname<<"|";
         file<<phone<<"|";
@@ -536,7 +539,7 @@ int main()
             cin>>choice;
             if (choice == '1')
             {
-                numberOfContacts = newContact(contacts,numberOfContacts);
+                numberOfContacts = newContact(contacts,numberOfContacts,idLoggedUser);
             }
             else if (choice == '2')
             {
