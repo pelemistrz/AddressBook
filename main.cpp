@@ -214,15 +214,15 @@ void showAllContacts(vector<Contact> &contacts, int numberOfContacts)
 
 int deleteContact(vector<Contact> &contacts, int numberOfContacts)
 {
-    int contactToDelete;
+    int idContactToDelete;
     cout << "Please provide contact id to remove." << endl;
-    cin >> contactToDelete;
+    cin >> idContactToDelete;
     int i = 0;
     bool isFound = false;
 
     while (i < numberOfContacts)
     {
-        if (contactToDelete == contacts[i].id)
+        if (idContactToDelete == contacts[i].id)
         {
             isFound = true;
             break;
@@ -250,19 +250,55 @@ int deleteContact(vector<Contact> &contacts, int numberOfContacts)
 
             int sizeOfVectorAterRemovingContact = contacts.size();
 
-            fstream file;
-            file.open("AddressBook.txt", ios::out);
-            file.clear();
-            for (int i = 0; i < sizeOfVectorAterRemovingContact; i++)
+            fstream fileOryginal;
+            fstream fileTemporary;
+            fileOryginal.open("AddressBook.txt", ios::in | ios::out);
+            fileTemporary.open("AddressBookTemporary.txt", ios::out);
+            fileTemporary.clear();
+
+            string line;
+            Contact contact;
+
+            while (getline(fileOryginal,line,'|'))
             {
-                file << contacts[i].id << "|";
-                file << contacts[i].name << "|";
-                file << contacts[i].surname << "|";
-                file << contacts[i].phone << "|";
-                file << contacts[i].email << "|";
-                file << contacts[i].address << endl;
+                contact.id = atoi(line.c_str());
+
+                getline(fileOryginal,line,'|');
+                contact.idUserWhoCreatedContact = atoi(line.c_str());
+
+                getline(fileOryginal,line,'|');
+                contact.name = line;
+
+                getline(fileOryginal,line,'|');
+                contact.surname = line;
+
+                getline(fileOryginal,line,'|');
+                contact.phone = line;
+
+                getline(fileOryginal,line,'|');
+                contact.email = line;
+
+                getline(fileOryginal,line);
+                contact.address = line;
+
+
+               if(contact.id != idContactToDelete){
+
+                 fileTemporary<<contact.id<<"|";
+                 fileTemporary<<contact.idUserWhoCreatedContact<<"|";
+                 fileTemporary<<contact.name<<"|";
+                 fileTemporary<<contact.surname<<"|";
+                 fileTemporary<<contact.phone<<"|";
+                 fileTemporary<<contact.email<<"|";
+                 fileTemporary<<contact.address<<endl;
+               }
             }
-            file.close();
+            fileOryginal.close();
+            fileTemporary.close();
+
+            remove("AddressBook.txt");
+            rename("AddressBookTemporary.txt","AddressBook.txt");
+
             cout << "Contact has been deleted." << endl;
             return --numberOfContacts;
         }
@@ -542,10 +578,6 @@ int main()
 
     int numberOfUsers = loadUsers(users);
     int idLoggedUser = 0;
-
-
-
-
     char choice;
 
     while(1)
@@ -570,7 +602,6 @@ int main()
                 exit(0);
             }
         }
-
 
         if(idLoggedUser !=0)
         {
@@ -631,9 +662,6 @@ int main()
                 exit(0);
             }
         }
-
-
-
     }
 }
 
