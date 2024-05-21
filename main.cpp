@@ -3,6 +3,7 @@
 #include <string>
 #include <windows.h>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -37,69 +38,6 @@ void showContact(vector<Contact> &contacts, int whichContact);
 
 
 //Ksiazka addressowa - funkcje
-int newContact(vector<Contact> &contacts,int numberOfContacts, int idLoggedUser)
-{
-    int lastId = 0;
-    int contactId = 0;
-    string name, surname, email, address, phone;
-
-    cout << "Please provide name " << endl;
-    cin >> name;
-    cout << "Please provide surname: " << endl;
-    cin >> surname;
-    cout << "Please provide email: " << endl;
-    cin >> email;
-    cout << "Please provide address: " << endl;
-    cin.sync();
-    getline(cin, address);
-    cout << "Please provide phone number: " << endl;
-    cin.sync();
-    getline(cin, phone);
-
-    if (contacts.size()==0)
-    {
-        contactId = 1;
-    }
-    else
-    {
-        lastId = contacts[contacts.size()-1].id;
-        contactId = lastId + 1;
-    }
-
-    Contact newContact;
-
-    newContact.id = contactId;
-    newContact.idUserWhoCreatedContact = idLoggedUser;
-    newContact.name = name;
-    newContact.surname = surname;
-    newContact.email = email;
-    newContact.address = address;
-    newContact.phone = phone;
-
-    contacts.push_back(newContact);
-
-    ofstream file;
-    file.open("AddressBook.txt",ios::out | ios::app);
-    if (file.good())
-    {
-        file<<contactId<<"|";
-        file<<idLoggedUser<<"|";
-        file<<name<<"|";
-        file<<surname<<"|";
-        file<<phone<<"|";
-        file<<email<<"|";
-        file<<address<<endl;
-
-        file.close();
-        cout<<endl;
-    }
-
-    numberOfContacts++;
-    cout<<"Contact has been added"<<endl;
-    system("pause");
-    system("cls");
-    return numberOfContacts;
-}
 
 int loadAddressBookFromFile(vector<Contact> &contacts, int idLoggedUser)
 {
@@ -144,6 +82,87 @@ int loadAddressBookFromFile(vector<Contact> &contacts, int idLoggedUser)
     }
 
     return counter;
+}
+
+int newContact(vector<Contact> &contacts,int numberOfContacts, int idLoggedUser)
+{
+    int lastId = 0;
+    int contactId = 0;
+    string name, surname, email, address, phone;
+
+    cout << "Please provide name " << endl;
+    cin >> name;
+    cout << "Please provide surname: " << endl;
+    cin >> surname;
+    cout << "Please provide email: " << endl;
+    cin >> email;
+    cout << "Please provide address: " << endl;
+    cin.sync();
+    getline(cin, address);
+    cout << "Please provide phone number: " << endl;
+    cin.sync();
+    getline(cin, phone);
+
+    ifstream fileToFindLastId;
+    string lastLine;
+
+    fileToFindLastId.open("AddressBook.txt");
+    if(fileToFindLastId.is_open()) {
+       fileToFindLastId.seekg(-5,ios_base::end);
+
+       int positionInFile = fileToFindLastId.tellg();
+      for(positionInFile;positionInFile > 0; positionInFile--)
+      {
+        if(fileToFindLastId.peek() == '\n')
+        {
+          //Found
+          fileToFindLastId.get();
+          break;
+        }
+
+        fileToFindLastId.seekg(positionInFile, std::ios_base::beg);
+      }
+        getline(fileToFindLastId,lastLine,'|');
+        lastId = atoi(lastLine.c_str());
+        fileToFindLastId.close();
+    }
+
+    contactId = lastId + 1;
+
+    Contact newContact;
+
+    newContact.id = contactId;
+    newContact.idUserWhoCreatedContact = idLoggedUser;
+    newContact.name = name;
+    newContact.surname = surname;
+    newContact.email = email;
+    newContact.address = address;
+    newContact.phone = phone;
+
+    contacts.push_back(newContact);
+
+    ofstream file;
+    file.open("AddressBook.txt",ios::out | ios::app);
+        if (file.good())
+        {
+            file<<contactId<<"|";
+            file<<idLoggedUser<<"|";
+            file<<name<<"|";
+            file<<surname<<"|";
+            file<<phone<<"|";
+            file<<email<<"|";
+            file<<address<<endl;
+
+            file.close();
+            cout<<endl;
+        }
+
+        numberOfContacts++;
+        cout<<"Contact has been added"<<endl;
+        system("pause");
+        system("cls");
+        return numberOfContacts;
+
 }
 
 void searchByName(vector<Contact> &contacts, int numberOfContacts)
@@ -585,9 +604,13 @@ int main()
         if(idLoggedUser==0)
         {
             cout << endl;
-            cout << "1. Sign in." << endl;
-            cout << "2. Log in." << endl;
-            cout << "9. Exit." << endl;
+            cout<<"     >>> MENU GLOWNE <<<"<<endl;
+            cout<<"-------------------------------"<<endl;
+            cout << "1. Sign in" << endl;
+            cout << "2. Log in" << endl;
+            cout << "9. Exit" << endl;
+            cout<<"-------------------------------"<<endl;
+            cout<<"Twoj wybor"<<endl;
             cin >> choice;
             if (choice == '1')
             {
