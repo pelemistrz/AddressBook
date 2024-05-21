@@ -276,6 +276,7 @@ int deleteContact(vector<Contact> &contacts, int numberOfContacts)
 void editContact(vector<Contact> &contacts, int numberOfContacts,int idLoggedUser)
 {
     int contactIdForEdit;
+    Contact contact;
     cout << "Please provide contact id for editing: " << endl;
     cin >> contactIdForEdit;
     int i = 0;
@@ -343,20 +344,60 @@ void editContact(vector<Contact> &contacts, int numberOfContacts,int idLoggedUse
         default:
             break;
         }
-        fstream file;
-        file.open("AddressBook.txt", ios::out);
-        file.clear();
-        for (int i = 0; i < numberOfContacts; i++)
+        fstream fileOryginal;
+        fstream fileTemporary;
+        fileOryginal.open("AddressBook.txt", ios::in | ios::out);
+        fileTemporary.open("AddressBookTemporary.txt", ios::out);
+        fileTemporary.clear();
+
+        while (getline(fileOryginal,line,'|'))
         {
-            file << contacts[i].id << "|";
-            file << contacts[i].idUserWhoCreatedContact<< "|";
-            file << contacts[i].name << "|";
-            file << contacts[i].surname << "|";
-            file << contacts[i].phone << "|";
-            file << contacts[i].email << "|";
-            file << contacts[i].address << endl;
+            contact.id = atoi(line.c_str());
+
+            getline(fileOryginal,line,'|');
+            contact.idUserWhoCreatedContact = atoi(line.c_str());
+
+            getline(fileOryginal,line,'|');
+            contact.name = line;
+
+            getline(fileOryginal,line,'|');
+            contact.surname = line;
+
+            getline(fileOryginal,line,'|');
+            contact.phone = line;
+
+            getline(fileOryginal,line,'|');
+            contact.email = line;
+
+            getline(fileOryginal,line);
+            contact.address = line;
+
+
+           if(contact.id == contactIdForEdit){
+            fileTemporary << contacts[i].id << "|";
+            fileTemporary << contacts[i].idUserWhoCreatedContact<< "|";
+            fileTemporary << contacts[i].name << "|";
+            fileTemporary << contacts[i].surname << "|";
+            fileTemporary << contacts[i].phone << "|";
+            fileTemporary << contacts[i].email << "|";
+            fileTemporary << contacts[i].address << endl;
+
+
+           } else {
+             fileTemporary<<contact.id<<"|";
+             fileTemporary<<contact.idUserWhoCreatedContact<<"|";
+             fileTemporary<<contact.name<<"|";
+             fileTemporary<<contact.surname<<"|";
+             fileTemporary<<contact.phone<<"|";
+             fileTemporary<<contact.email<<"|";
+             fileTemporary<<contact.address<<endl;
+           }
         }
-        file.close();
+        fileOryginal.close();
+        fileTemporary.close();
+
+        remove("AddressBook.txt");
+        rename("AddressBookTemporary.txt","AddressBook.txt");
     }
 }
 
@@ -579,7 +620,7 @@ int main()
             }
             else if (choice == '6')
             {
-                editContact(contacts,numberOfContacts);
+                editContact(contacts,numberOfContacts,idLoggedUser);
                 system("pause");
                 system("cls");
 
