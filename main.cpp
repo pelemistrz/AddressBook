@@ -27,7 +27,7 @@ void searchByName(vector<Contact> &contacts,int numberOfContacts);
 void searchBySurname(vector<Contact> &contacts, int numberOfContacts);
 void showAllContacts(vector<Contact> &contacts, int numberOfContacts);
 int deleteContact(vector<Contact> &contacts, int numberOfContacts);
-void editContact(vector<Contact> &contacts, int numberOfContacts);
+void editContact(vector<Contact> &contacts, int numberOfContacts,int idLoggedUser);
 
 int loadUsers(vector<User> &users);
 int registration(vector<User> &users, int numberOfUsers);
@@ -101,11 +101,13 @@ int newContact(vector<Contact> &contacts,int numberOfContacts, int idLoggedUser)
     return numberOfContacts;
 }
 
-int loadAddressBookFromFile(vector<Contact> &contacts)
+int loadAddressBookFromFile(vector<Contact> &contacts, int idLoggedUser)
 {
     ifstream file;
     file.open("AddressBook.txt",ios::in);
     int counter = 0;
+
+
     string line;
 
     Contact contact;
@@ -115,6 +117,9 @@ int loadAddressBookFromFile(vector<Contact> &contacts)
         while (getline(file,line,'|'))
         {
             contact.id = atoi(line.c_str());
+
+            getline(file,line,'|');
+            contact.idUserWhoCreatedContact = atoi(line.c_str());
 
             getline(file,line,'|');
             contact.name = line;
@@ -131,9 +136,10 @@ int loadAddressBookFromFile(vector<Contact> &contacts)
             getline(file,line);
             contact.address = line;
 
-            contacts.push_back(contact);
-
-            counter++;
+            if(contact.idUserWhoCreatedContact == idLoggedUser){
+                contacts.push_back(contact);
+                counter++;
+            }
         }
     }
 
@@ -267,7 +273,7 @@ int deleteContact(vector<Contact> &contacts, int numberOfContacts)
     }
 }
 
-void editContact(vector<Contact> &contacts, int numberOfContacts)
+void editContact(vector<Contact> &contacts, int numberOfContacts,int idLoggedUser)
 {
     int contactIdForEdit;
     cout << "Please provide contact id for editing: " << endl;
@@ -343,6 +349,7 @@ void editContact(vector<Contact> &contacts, int numberOfContacts)
         for (int i = 0; i < numberOfContacts; i++)
         {
             file << contacts[i].id << "|";
+            file << contacts[i].idUserWhoCreatedContact<< "|";
             file << contacts[i].name << "|";
             file << contacts[i].surname << "|";
             file << contacts[i].phone << "|";
@@ -495,7 +502,7 @@ int main()
     int numberOfUsers = loadUsers(users);
     int idLoggedUser = 0;
 
-    int numberOfContacts = loadAddressBookFromFile(contacts);
+
 
 
     char choice;
@@ -526,6 +533,8 @@ int main()
 
         if(idLoggedUser !=0)
         {
+            int numberOfContacts = loadAddressBookFromFile(contacts, idLoggedUser);
+
             cout<<endl;
             cout<<"Welcome in Address Book. Please choose one option: " <<endl<<endl;
             cout<<"1. Add new contact."<<endl;
